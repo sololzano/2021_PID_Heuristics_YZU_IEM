@@ -24,8 +24,8 @@ function [new_population, new_f] = antivirus...
         new_f = f(1:n);
     end
 
-    % Avoid more than 100 viruses for memory's sake
-    n = min(50, length(new_population));
+    % Avoid more than 5 viruses for memory's sake
+    n = min(20, length(new_population));
     new_population = new_population(1:n, :);
     new_f = new_f(1:n);
 end

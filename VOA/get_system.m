@@ -37,4 +37,16 @@ function sr = get_system(system)
         q = (M+m)*(I+m*l^2)-(m*l)^2;
         sr = (m*l*s/q)/(s^3 + (b*(I + m*l^2))*s^2/q - ((M + m)*m*g*l)*s/q - b*m*g*l/q);
     end
+    if system == "AVR"
+        Ka = 10.0;
+        Ke = 1.0;
+        Kg = 1.0;
+        ta = 0.1;
+        te = 0.4;
+        tg = 1.0;
+        amp = Ka / (1 + ta*s);
+        exc = Ke / (1 + te*s);
+        gen = Kg / (1 + tg*s);
+        sr = amp * exc * gen;
+    end
 end

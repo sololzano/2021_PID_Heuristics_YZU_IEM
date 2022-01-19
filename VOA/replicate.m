@@ -1,38 +1,42 @@
 function [new_viruses, f] = replicate...
     (population, strong_percent, strong_rate, weak_rate,... 
-    intensity, wr, system)
+    intensity, wr, system, intensity_weak, sensor, x_min, x_max)
     arguments
         population(:, 3) double;
         strong_percent double = 0.4;
-        strong_rate int8 = 1;
-        weak_rate int8 = 2;
+        strong_rate int32 = 1;
+        weak_rate int32 = 2;
         intensity double = 2.;
         wr(1, 4) double = [1., 1., 1., 1.];
         system string = "PITCH";
+        intensity_weak double = 0.5;
+        sensor = 1;
+        x_min (1, 3) double = [0., 0. 0.];
+        x_max (1, 3) double = [100., 100., 50.];
     end
     n_strong = int32(length(population) * strong_percent);
+    n_weak = length(population) - n_strong;
     strong_viruses = population(1:n_strong, :);
     weak_viruses = population(n_strong+1:end, :);
-
+    new_viruses = zeros((2*n_strong*strong_rate) + (2*n_weak*weak_rate), 3);
     % Replicate strong viruses
-    for i=1:strong_rate
-        sp = strong_viruses + (rand(n_strong, 3)*intensity);
-        sn = strong_viruses - (rand(n_strong, 3)*intensity);
-        population = [population; sp; sn]; %#ok<AGROW> 
-    end
-
+    sp = repmat(strong_viruses, strong_rate, 1) +...
+        (rand(int32(n_strong * strong_rate), 3)*intensity);
+    sn = repmat(strong_viruses, strong_rate, 1) -...
+        (rand(int32(n_strong .* strong_rate), 3).*intensity);
     % Replicate weak viruses
-    for i=1:weak_rate
-        wp = weak_viruses + rand(length(weak_viruses), 3)/intensity;
-        wn = weak_viruses - rand(length(weak_viruses), 3)/intensity;
-        population = [population; wp; wn]; %#ok<AGROW> 
-    end
-    new_viruses = population;
-
+    wp = repmat(weak_viruses, weak_rate, 1) +...
+        (rand(int32(n_weak .* weak_rate), 3)./intensity_weak);
+    wn = repmat(weak_viruses, weak_rate, 1) -...
+        (rand(int32(n_weak .* weak_rate), 3)./intensity_weak);
+    
+    % New viruses
+    new_viruses(:, :) = [sp; sn; wp; wn];
     % Evaluate and sort
     f = zeros(1, length(new_viruses));
     for i=1:length(new_viruses)
-        f(i) = objective_function(new_viruses(i, :), wr, system);
+        new_viruses(i, :) = clip(new_viruses(i, :), x_min, x_max);
+        f(i) = objective_function(new_viruses(i, :), wr, system, sensor);
     end
     [f, idx] = sort(f);
     new_viruses = new_viruses(idx, :);

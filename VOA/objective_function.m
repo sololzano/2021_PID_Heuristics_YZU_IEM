@@ -1,9 +1,10 @@
 % Objective function
-function v = objective_function(x, w, system)
+function v = objective_function(x, w, system, sensor)
     arguments
         x (1, 3) double = [0., 0., 0.];
         w (1, 4) double = [1, 1, 1, 1];
         system string = "PITCH";
+        sensor = 1;
     end
 
     % System transfer function
@@ -13,7 +14,7 @@ function v = objective_function(x, w, system)
     C = pid(x(1), x(2), x(3));
 
     % Step response for system
-    T_sys = feedback(sr * C, 1);
+    T_sys = feedback(sr * C, sensor);
     S = stepinfo(T_sys);
     tr = S.RiseTime;
     os = S.Overshoot;
