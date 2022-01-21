@@ -1,4 +1,4 @@
-function [gb_array, x] = sad_voa...
+function [gb_array, fb_array] = sad_voa...
     (viruses, x_min, x_max, strong_percent, strong_rate,...
     weak_rate, intensity, decay, survivor_percent, kind,...
     iterations, mode, wr, system, intensity_weak, sensor)
@@ -23,10 +23,12 @@ function [gb_array, x] = sad_voa...
     % Initialize viruses in the space
     [x, f] = init_viruses(viruses, x_min, x_max, system, wr, sensor);
     gb_array = zeros(iterations, 3);
+    fb_array = zeros(iterations, 1);
     m = mean(f);
     zero_intensity = intensity;
     % Iterate 
     for i=1:iterations
+        disp("Iteration " + i + "/" + iterations);
         % Replicate
         p_i = length(x);
         [x, f] = replicate(x, strong_percent, strong_rate,...
@@ -50,7 +52,7 @@ function [gb_array, x] = sad_voa...
         % Increase exploitation through intensity for super adaptiveness
         if (mode == "SAD")
             if (m > mean(f))
-                intensity = 0.5*(1 + cos(double(i/iterations) * pi))*zero_intensity + zero_intensity;
+                intensity = 0.5*(1 + cos((double(i)/double(iterations))*pi))*zero_intensity;
                 strong = (p_i * strong_percent)*(1+((p_n - p_i)/max(p_i, p_n)));
                 strong_percent = ceil(strong)/p_n;
                 % Update growth rates
@@ -61,7 +63,6 @@ function [gb_array, x] = sad_voa...
                 weak_rate = clip(weak_rate, 1, 3);
             else
                 intensity = zero_intensity;
-                disp("No sad");
             end
             m = mean(f);
         end
@@ -72,8 +73,9 @@ function [gb_array, x] = sad_voa...
         end
 
         % Sort and update global best array
-        [f, idx] = sort(f); %#ok<ASGLU> 
+        [f, idx] = sort(f);
         x = x(idx, :);
         gb_array(i, :) = x(1, :);
+        fb_array(i, :) = f(1);
     end
 end
