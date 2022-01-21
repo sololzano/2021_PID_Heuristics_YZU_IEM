@@ -49,4 +49,14 @@ function sr = get_system(system)
         gen = Kg / (1 + tg*s);
         sr = amp * exc * gen;
     end
+    if system == "WHALE_1"
+        sr = (104.9)/(s^2 + 103.5*s + 2617);
+    end
+    if system == "WHALE_2"
+        sr = (25.28*s^2 + 22.2*s + 3) /...
+            (s^5 + 16.6*s^4 + 25.41*s^3 + 17.2*s^2 + 12*s + 1);
+    end
+    if system == "WHALE_3"
+        sr = 1 / (s^4 + 6*s^3 + 11*s^2 + 6*s);
+    end
 end
